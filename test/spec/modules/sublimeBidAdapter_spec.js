@@ -15,7 +15,7 @@ describe('Sublime Adapter', () => {
     let bid = {
       bidder: 'sublime',
       params: {
-        zoneId: 14312,
+        zoneId: 24549,
         endpoint: '',
         sacHost: 'sac.ayads.co',
       },
@@ -27,7 +27,7 @@ describe('Sublime Adapter', () => {
 
     it('should return false when required params are not passed', () => {
       let bid = Object.assign({}, bid);
-      delete bid.params;
+      bid.params = {};
       expect(spec.isBidRequestValid(bid)).to.equal(false);
     });
   });
@@ -40,7 +40,8 @@ describe('Sublime Adapter', () => {
       sizes: [[1800, 1000], [640, 300]],
       requestId: 'xyz654',
       params: {
-        zoneId: 14312
+        zoneId: 14312,
+        bidHost: 'pbjs.ayads.co.local'
       }
     }];
 
@@ -54,8 +55,8 @@ describe('Sublime Adapter', () => {
       expect(request.request_id).to.equal(bidRequests.bidId);
     });
 
-    it('should have an url that contains notify keyword', () => {
-      expect(request.url).to.match(/notify/);
+    it('should have an url that contains bid keyword', () => {
+      expect(request.url).to.match(/bid/);
     });
   });
 
