@@ -9,33 +9,6 @@ const DEFAULT_PROTOCOL = 'https';
 const SUBLIME_VERSION = '0.3';
 let SUBLIME_ZONE = null;
 
-/**
- * Send a pixel to antenna
- * @param {String} name The pixel name
- * @param {String} [requestId]
- */
-function sendAntennaPixel(name, requestId) {
-  if (typeof top.sublime !== 'undefined') {
-    let param = {
-      qs: {
-        z: SUBLIME_ZONE
-      }
-    };
-    if (requestId) {
-      param.qs.reqid = encodeURIComponent(requestId);
-    }
-    top.sublime.analytics.fire(name, param);
-  } else {
-    var et = Math.round(window.performance.now());
-    var ts = new Date().getTime();
-    var url = 'https://antenna.ayads.co/?t=' + ts + '&z=' + SUBLIME_ZONE + '&e=' + name + '&et=' + et;
-    if (requestId) {
-      url += '&reqid=' + encodeURIComponent(requestId);
-    }
-    utils.triggerPixel(url);
-  }
-}
-
 export const spec = {
   code: BIDDER_CODE,
   aliases: ['sskz', 'sublime-skinz'],
@@ -87,17 +60,7 @@ export const spec = {
     let callbackName = (params.callbackName || DEFAULT_CALLBACK_NAME) + '_' + params.zoneId;
     SUBLIME_ZONE = params.zoneId;
 
-    // debug pixel build request
-    sendAntennaPixel('dpbduireq', requestId);
-
-    // debug pixel if window[callbackName] already exists
-    if (typeof window[callbackName] === 'function') {
-      sendAntennaPixel('dpbcalae', requestId);
-    }
-
     window[callbackName] = (response) => {
-      sendAntennaPixel('dpubclbcal', requestId);
-
       var requestIdEncoded = encodeURIComponent(requestId);
       var hasAd = response.ad ? '1' : '0';
       var xhr = new XMLHttpRequest();
@@ -137,9 +100,6 @@ export const spec = {
    * @return {Bid[]} An array of bids which were nested inside the server.
    */
   interpretResponse: (serverResponse) => {
-    // debug pixel interpret response
-    sendAntennaPixel('dintres');
-
     const bidResponses = [];
     const response = serverResponse.body;
 
@@ -159,26 +119,9 @@ export const spec = {
         ad: serverResponse.body.ad || '',
       };
 
-      if (!response.cpm) {
-        sendAntennaPixel('dirnocpm', bidResponse.requestId);
-      }
-
-      if (response.timeout) {
-        // Debug timeout from the long polling server
-        sendAntennaPixel('dlptimeout', bidResponse.requestId);
-      } else if (bidResponse.ad.match(regexNoAd)) {
-        // Debug LP response no ad (a=0 in the notify)
-        sendAntennaPixel('dlpnoad', bidResponse.requestId);
-      } else if (bidResponse.ad === '') {
-        // Debug no ad in the interpret response, what happenned ?
-        sendAntennaPixel('drespnoad', bidResponse.requestId);
-      } else {
-        sendAntennaPixel('bid', bidResponse.requestId);
+      if (!response.timeout && !bidResponse.ad.match(regexNoAd) && response.cpm) {
         bidResponses.push(bidResponse);
       }
-    } else {
-      // debug pixel no request
-      sendAntennaPixel('dirnorq');
     }
 
     return bidResponses;
@@ -193,14 +136,6 @@ export const spec = {
    */
   getUserSyncs: (syncOptions, serverResponses) => {
     return [];
-  },
-
-  /**
-   * @param {TimedOutBid} timeoutData
-   */
-  onTimeout: (timeoutData) => {
-    // debug pixel timeout from pbjs
-    sendAntennaPixel('dbidtimeout');
   }
 };
 
