@@ -2,7 +2,7 @@ import { registerBidder } from 'src/adapters/bidderFactory';
 import * as utils from '../src/utils';
 
 const BIDDER_CODE = 'sublime';
-const DEFAULT_BID_HOST = 'pbjs.ayads.co';
+const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_SAC_HOST = 'sac.ayads.co';
 const DEFAULT_CALLBACK_NAME = 'sublime_prebid_callback';
 const DEFAULT_PROTOCOL = 'https';
