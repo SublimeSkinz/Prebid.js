@@ -1,4 +1,4 @@
-import { registerBidder } from 'src/adapters/bidderFactory';
+import { registerBidder } from '../src/adapters/bidderFactory';
 import { config } from '../src/config';
 import * as utils from '../src/utils';
 
@@ -73,12 +73,6 @@ export const spec = {
       };
     }
 
-    window.sublime.pbjs = (typeof window.sublime.pbjs !== 'undefined') ? window.sublime.pbjs : {};
-    window.sublime.pbjs.injected = {
-      bt: config.getConfig('bidderTimeout'),
-      ts: Date.now()
-    };
-
     // Grab only the first `validBidRequest`
     let bid = validBidRequests[0];
 
@@ -97,8 +91,13 @@ export const spec = {
     // debug pixel build request
     sendAntennaPixel('dpbduireq', requestId);
 
-    window.sublime.pbjs.injected.requestId = requestId;
-    window.sublime.pbjs.injected.version = SUBLIME_VERSION;
+    window.sublime.pbjs = (typeof window.sublime.pbjs !== 'undefined') ? window.sublime.pbjs : {};
+    window.sublime.pbjs.injected = {
+      bt: config.getConfig('bidderTimeout'),
+      ts: Date.now(),
+      version: SUBLIME_VERSION,
+      requestId
+    };
 
     let script = document.createElement('script');
     script.type = 'application/javascript';
@@ -183,7 +182,7 @@ export const spec = {
         sendAntennaPixel('bid', bidResponse.requestId);
         bidResponses.push(bidResponse);
       }
-      // Debuf timeout
+      // Debug timeout
       if (response.timeout) {
         // Debug timeout from the long polling server
         sendAntennaPixel('dlptimeout', bidResponse.requestId);
