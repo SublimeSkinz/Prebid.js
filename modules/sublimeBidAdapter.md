@@ -11,6 +11,10 @@ Maintainer: pbjs@sublimeskinz.com
 Connects to Sublime for bids.
 Sublime bid adapter supports Skinz and M-Skinz formats.
 
+# Nota Bene
+
+Our prebid adapter is unusable with SafeFrame.
+
 # Build
 
 You can build your version of prebid.js, execute: 
