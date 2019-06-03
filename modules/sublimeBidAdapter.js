@@ -6,7 +6,7 @@ const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_SAC_HOST = 'sac.ayads.co';
 const DEFAULT_CALLBACK_NAME = 'sublime_prebid_callback';
 const DEFAULT_PROTOCOL = 'https';
-const SUBLIME_VERSION = '0.3.2';
+const SUBLIME_VERSION = '0.3.3';
 let SUBLIME_ZONE = null;
 
 /**
@@ -125,7 +125,10 @@ export const spec = {
       data: {
         prebid: 1,
         request_id: requestId,
-        z: SUBLIME_ZONE
+        z: SUBLIME_ZONE,
+        meta: {
+          mediaTypes: bid.mediaTypes
+        }
       }
     };
   },
@@ -134,9 +137,10 @@ export const spec = {
      * Unpack the response from the server into a list of bids.
      *
      * @param {*} serverResponse A successful response from the server.
+     * @param {*} bidRequest An object with bid request informations
      * @return {Bid[]} An array of bids which were nested inside the server.
      */
-  interpretResponse: (serverResponse) => {
+  interpretResponse: (serverResponse, bidRequest) => {
     // debug pixel interpret response
     sendAntennaPixel('dintres');
 
@@ -144,12 +148,29 @@ export const spec = {
     const response = serverResponse.body;
 
     if (response) {
+      // Setting our returned sizes object to default values
+      let returnedSizes = {
+        width: 1800,
+        height: 1000
+      };
+
+      // Getting banner sizes, if not defined we set bannerSize to false
+      const bannerSize = bidRequest ? bidRequest.data.meta.mediaTypes.banner.sizes[0] || false : false;
+      // Verifying Banner sizes
+      if (bannerSize[0] === 1 && bannerSize[1] === 1) {
+        // If banner sizes are 1x1 we set our default size object to 1x1
+        returnedSizes = {
+          width: 1,
+          height: 1
+        };
+      }
+
       const regexNoAd = /no ad/gmi;
       const bidResponse = {
         requestId: serverResponse.body.request_id || '',
         cpm: serverResponse.body.cpm || 0,
-        width: 1800,
-        height: 1000,
+        width: returnedSizes.width,
+        height: returnedSizes.height,
         creativeId: 1,
         dealId: 1,
         currency: serverResponse.body.currency || 'USD',
