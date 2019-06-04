@@ -125,7 +125,7 @@ export const spec = {
       h: null
     };
 
-    if(bid.mediaTypes && bid.mediaTypes.banner && bid.mediaTypes.banner.sizes && bid.mediaTypes.banner.sizes[0]) {
+    if (bid.mediaTypes && bid.mediaTypes.banner && bid.mediaTypes.banner.sizes && bid.mediaTypes.banner.sizes[0]) {
       // Setting size for banner if they exist
       sizes.w = bid.mediaTypes.banner.sizes[0][0] || false;
       sizes.h = bid.mediaTypes.banner.sizes[0][1] || false;
@@ -166,7 +166,7 @@ export const spec = {
       };
 
       // Verifying Banner sizes
-      if (bidRequest.data.w === 1 && bidRequest.data.h === 1) {
+      if (bidRequest && bidRequest.data.w === 1 && bidRequest.data.h === 1) {
         // If banner sizes are 1x1 we set our default size object to 1x1
         returnedSizes = {
           width: 1,
