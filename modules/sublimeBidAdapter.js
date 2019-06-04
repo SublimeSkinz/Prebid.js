@@ -119,6 +119,18 @@ export const spec = {
     script.src = 'https://' + sacHost + '/sublime/' + SUBLIME_ZONE + '/prebid?callback=' + callbackName;
     document.body.appendChild(script);
 
+    // Initial size object
+    let sizes = {
+      w: null,
+      h: null
+    };
+
+    if(bid.mediaTypes && bid.mediaTypes.banner && bid.mediaTypes.banner.sizes && bid.mediaTypes.banner.sizes[0]) {
+      // Setting size for banner if they exist
+      sizes.w = bid.mediaTypes.banner.sizes[0][0] || false;
+      sizes.h = bid.mediaTypes.banner.sizes[0][1] || false;
+    }
+
     return {
       method: 'GET',
       url: protocol + '://' + bidHost + '/bid',
@@ -126,9 +138,8 @@ export const spec = {
         prebid: 1,
         request_id: requestId,
         z: SUBLIME_ZONE,
-        meta: {
-          mediaTypes: bid.mediaTypes
-        }
+        w: sizes.w || 1800,
+        h: sizes.h || 1000
       }
     };
   },
@@ -154,10 +165,8 @@ export const spec = {
         height: 1000
       };
 
-      // Getting banner sizes, if not defined we set bannerSize to false
-      const bannerSize = bidRequest ? bidRequest.data.meta.mediaTypes.banner.sizes[0] || false : false;
       // Verifying Banner sizes
-      if (bannerSize[0] === 1 && bannerSize[1] === 1) {
+      if (bidRequest.data.w === 1 && bidRequest.data.h === 1) {
         // If banner sizes are 1x1 we set our default size object to 1x1
         returnedSizes = {
           width: 1,
