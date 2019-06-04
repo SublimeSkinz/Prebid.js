@@ -85,6 +85,11 @@ describe('Sublime Adapter', () => {
       expect(request.data.request_id).to.equal(bidRequests[0].bidId);
     });
 
+    it('should have height and width', () => {
+      expect(request.data.w).to.equal(1800);
+      expect(request.data.h).to.equal(1000);
+    });
+
     it('should have an url that contains bid keyword', () => {
       expect(request.url).to.match(/bid/);
     });
