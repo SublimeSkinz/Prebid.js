@@ -123,6 +123,41 @@ describe('Sublime Adapter', () => {
     });
   });
 
+  describe('buildRequests: 1x1 size', () => {
+    let bidRequests = [{
+      bidder: 'sublime',
+      adUnitCode: 'sublime_code',
+      bidId: 'def1234',
+      sizes: [[1, 1]],
+      mediaTypes: {
+        banner: {
+          sizes: [
+            [1, 1]
+          ]
+        }
+      },
+      requestId: 'uvw654',
+      params: {
+        zoneId: 1
+      }
+    }];
+
+    let request = spec.buildRequests(bidRequests);
+
+    it('should have an url that match the default endpoint', () => {
+      expect(request.url).to.equal('https://pbjs.sskzlabs.com/bid');
+    });
+
+    it('should contain the correct 1x1 size', () => {
+      expect(request.data.w).to.equal(1);
+      expect(request.data.h).to.equal(1);
+    });
+
+    it('should create a default callback function', () => {
+      expect(window['sublime_prebid_callback_1']).to.be.an('function');
+    });
+  });
+
   describe('buildRequests: test callback', () => {
     let XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
@@ -200,6 +235,84 @@ describe('Sublime Adapter', () => {
       let serverResponse = {};
       let result = spec.interpretResponse({body: serverResponse});
       expect(result).to.deep.equal([]);
+    });
+  });
+
+  describe('interpretResponse: with bidRequest containing sizes', () => {
+    let serverResponse = {
+      'request_id': '22f7fda4b6c531',
+      'cpm': 0.6,
+      'ad': '<!-- Creative -->',
+    };
+
+    it('should get a bid response with correct size from unsupported sizes', () => {
+      // Mock the fire method
+      top.window.sublime = {
+        analytics: {
+          fire: function() {}
+        }
+      };
+
+      let bidRequest = {
+        'data': {
+          'h': 250, // Unsupported size
+          'w': 250, // Unsupported size
+        }
+      };
+
+      let expectedResponse = [
+        {
+          requestId: '',
+          cpm: 0.5,
+          width: 1800,
+          height: 1000,
+          creativeId: 1,
+          dealId: 1,
+          currency: 'USD',
+          netRevenue: true,
+          ttl: 600,
+          referrer: '',
+          ad: '',
+        },
+      ];
+      let result = spec.interpretResponse({body: serverResponse}, bidRequest);
+
+      expect(Object.keys(result[0])).to.have.members(Object.keys(expectedResponse[0]));
+    });
+
+    it('should get a bid response with correct size from 1x1 size', () => {
+      // Mock the fire method
+      top.window.sublime = {
+        analytics: {
+          fire: function() {}
+        }
+      };
+
+      let bidRequest = {
+        'data': {
+          'h': 1,
+          'w': 1,
+        }
+      };
+
+      let expectedResponse = [
+        {
+          requestId: '',
+          cpm: 0.5,
+          width: 1,
+          height: 1,
+          creativeId: 1,
+          dealId: 1,
+          currency: 'USD',
+          netRevenue: true,
+          ttl: 600,
+          referrer: '',
+          ad: '',
+        },
+      ];
+      let result = spec.interpretResponse({body: serverResponse}, bidRequest);
+
+      expect(Object.keys(result[0])).to.have.members(Object.keys(expectedResponse[0]));
     });
   });
 
