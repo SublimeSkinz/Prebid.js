@@ -1,6 +1,8 @@
 import { registerBidder } from 'src/adapters/bidderFactory';
 import * as utils from '../src/utils';
 
+const { config } = require('../src/config');
+
 const BIDDER_CODE = 'sublime';
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_SAC_HOST = 'sac.ayads.co';
@@ -71,6 +73,19 @@ export const spec = {
         gdprApplies: gdpr.gdprApplies
       };
     }
+
+    const pbjs = {
+      bt: config.getConfig('bidderTimeout'),
+      ts: Date.now()
+    }
+
+    window.sublime = (typeof window.sublime !== 'undefined') ? window.sublime : {};
+    window.sublime.pbjs = (typeof window.sublime.pbjs !== 'undefined') ? window.sublime.pbjs : {};
+    window.sublime.pbjs.injected = {
+      bt: pbjs.bt,
+      ts: pbjs.ts
+    };
+
     // Grab only the first `validBidRequest`
     let bid = validBidRequests[0];
 
