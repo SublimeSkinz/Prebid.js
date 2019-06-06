@@ -74,15 +74,10 @@ export const spec = {
       };
     }
 
-    const pbjs = {
-      bt: config.getConfig('bidderTimeout'),
-      ts: Date.now()
-    };
-
     window.sublime.pbjs = (typeof window.sublime.pbjs !== 'undefined') ? window.sublime.pbjs : {};
     window.sublime.pbjs.injected = {
-      bt: pbjs.bt,
-      ts: pbjs.ts
+      bt: config.getConfig('bidderTimeout'),
+      ts: Date.now()
     };
 
     // Grab only the first `validBidRequest`
