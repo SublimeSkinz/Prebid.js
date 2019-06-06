@@ -1,7 +1,6 @@
 import { registerBidder } from 'src/adapters/bidderFactory';
+import { config } from '../src/config';
 import * as utils from '../src/utils';
-
-const { config } = require('../src/config');
 
 const BIDDER_CODE = 'sublime';
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
@@ -60,13 +59,14 @@ export const spec = {
      * @return ServerRequest Info describing the request to the server.
      */
   buildRequests: (validBidRequests, bidderRequest) => {
+    window.sublime = window.sublime ? window.sublime : {}
+
     if (bidderRequest && bidderRequest.gdprConsent) {
       const gdpr = {
         consentString: bidderRequest.gdprConsent.consentString,
         gdprApplies: (typeof bidderRequest.gdprConsent.gdprApplies === 'boolean') ? bidderRequest.gdprConsent.gdprApplies : true
       };
 
-      window.sublime = (typeof window.sublime !== 'undefined') ? window.sublime : {};
       window.sublime.gdpr = (typeof window.sublime.gdpr !== 'undefined') ? window.sublime.gdpr : {};
       window.sublime.gdpr.injected = {
         consentString: gdpr.consentString,
@@ -77,9 +77,8 @@ export const spec = {
     const pbjs = {
       bt: config.getConfig('bidderTimeout'),
       ts: Date.now()
-    }
+    };
 
-    window.sublime = (typeof window.sublime !== 'undefined') ? window.sublime : {};
     window.sublime.pbjs = (typeof window.sublime.pbjs !== 'undefined') ? window.sublime.pbjs : {};
     window.sublime.pbjs.injected = {
       bt: pbjs.bt,
