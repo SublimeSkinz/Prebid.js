@@ -5,9 +5,8 @@ import * as utils from '../src/utils';
 const BIDDER_CODE = 'sublime';
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_SAC_HOST = 'sac.ayads.co';
-const DEFAULT_CALLBACK_NAME = 'sublime_prebid_callback';
 const DEFAULT_PROTOCOL = 'https';
-const SUBLIME_VERSION = '0.3.3';
+const SUBLIME_VERSION = '0.3.5';
 let SUBLIME_ZONE = null;
 
 /**
@@ -93,39 +92,17 @@ export const spec = {
     let sacHost = params.sacHost || DEFAULT_SAC_HOST;
     let bidHost = params.bidHost || DEFAULT_BID_HOST;
     let protocol = params.protocol || DEFAULT_PROTOCOL;
-    let callbackName = (params.callbackName || DEFAULT_CALLBACK_NAME) + '_' + params.zoneId;
     SUBLIME_ZONE = params.zoneId;
 
     // debug pixel build request
     sendAntennaPixel('dpbduireq', requestId);
 
-    // debug pixel if window[callbackName] already exists
-    if (typeof window[callbackName] === 'function') {
-      sendAntennaPixel('dpbcalae', requestId);
-    }
+    window.sublime.pbjs.injected.requestId = requestId;
+    window.sublime.pbjs.injected.version = SUBLIME_VERSION;
 
-    window[callbackName] = (response) => {
-      sendAntennaPixel('dpubclbcal', requestId);
-
-      var requestIdEncoded = encodeURIComponent(requestId);
-      var hasAd = response.ad ? '1' : '0';
-      var xhr = new XMLHttpRequest();
-      var url = protocol + '://' + bidHost + '/notify?request_id=' + requestIdEncoded + '&a=' + hasAd + '&z=' + SUBLIME_ZONE;
-      xhr.open('POST', url, true);
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      xhr.send(
-        'notify=1' +
-                '&request_id=' + requestIdEncoded +
-                '&ad=' + encodeURIComponent(response.ad || '') +
-                '&cpm=' + encodeURIComponent(response.cpm || 0) +
-                '&currency=' + encodeURIComponent(response.currency || 'USD') +
-                '&v=' + SUBLIME_VERSION
-      );
-      return xhr;
-    };
     let script = document.createElement('script');
     script.type = 'application/javascript';
-    script.src = 'https://' + sacHost + '/sublime/' + SUBLIME_ZONE + '/prebid?callback=' + callbackName;
+    script.src = 'https://' + sacHost + '/sublime/' + SUBLIME_ZONE + '/prebid?callback=false';
     document.body.appendChild(script);
 
     // Initial size object
