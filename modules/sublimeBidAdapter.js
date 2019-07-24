@@ -6,27 +6,8 @@ const BIDDER_CODE = 'sublime';
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_SAC_HOST = 'sac.ayads.co';
 const DEFAULT_PROTOCOL = 'https';
-const SUBLIME_VERSION = '0.3.5';
+const SUBLIME_VERSION = '0.3.6';
 let SUBLIME_ZONE = null;
-
-/**
- * Send a pixel to antenna
- * @param {String} name The pixel name
- * @param {String} [requestId]
- */
-function sendAntennaPixel(name, requestId) {
-  if (typeof top.sublime !== 'undefined' && typeof top.sublime.analytics !== 'undefined') {
-    let param = {
-      qs: {
-        z: SUBLIME_ZONE
-      }
-    };
-    if (requestId) {
-      param.qs.reqid = encodeURIComponent(requestId);
-    }
-    top.sublime.analytics.fire(SUBLIME_ZONE, name, param);
-  }
-}
 
 export const spec = {
   code: BIDDER_CODE,
@@ -160,7 +141,6 @@ export const spec = {
       };
 
       if (!response.timeout && !bidResponse.ad.match(regexNoAd) && response.cpm) {
-        sendAntennaPixel('bid', bidResponse.requestId);
         bidResponses.push(bidResponse);
       }
     }
