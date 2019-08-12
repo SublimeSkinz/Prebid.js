@@ -35,11 +35,13 @@ export const spec = {
       prebidVersion: '$prebid.version$',
       currencyCode: config.getConfig('currency.adServerCurrency') || 'EUR',
       timeout: config.getConfig('bidderTimeout'),
-      // Prebid execution context
-      referer: (typeof bidderRequest.refererInfo.referer != 'undefined' ? encodeURIComponent(bidderRequest.refererInfo.referer) : null),
-      numIframes: (typeof bidderRequest.refererInfo.numIframes != 'undefined' ? bidderRequest.refererInfo.numIframes : null),
-      pageDomain: encodeURIComponent(utils.getTopWindowUrl()),
+      pageDomain: utils.getTopWindowUrl(),
     };
+    // RefererInfo
+    if (bidderRequest && bidderRequest.refererInfo) {
+      commonPayload.referer = bidderRequest.refererInfo.referer;
+      commonPayload.numIframes = bidderRequest.refererInfo.numIframes;
+    }
     // GDPR handling
     if (bidderRequest && bidderRequest.gdprConsent) {
       commonPayload.gdprConsent = bidderRequest.gdprConsent.consentString;
