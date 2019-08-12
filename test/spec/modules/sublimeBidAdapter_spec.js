@@ -140,25 +140,29 @@ describe('Sublime Adapter', function() {
 
     it('should get correct default size for 1x1', function() {
       let serverResponse = {
-        'request_id': '3db3773286ee59',
+        'requestId': 'xyz654_2',
         'cpm': 0.5,
         'ad': '<!-- Creative -->',
       };
+
       let bidRequest = {
         bidder: 'sublime',
         adUnitCode: 'sublime_code_2',
         bidId: 'abc1234_2',
-        sizes: [[1, 1]],
-        data: [[1, 1]],
+        data: {
+          w: 1,
+          h: 1,
+        },
         requestId: 'xyz654_2',
         params: {
           zoneId: 456,
         }
       };
+
       let result = spec.interpretResponse({body: serverResponse}, bidRequest);
 
       let expectedResponse = {
-        requestId: '',
+        requestId: 'xyz654_2',
         cpm: 0.5,
         width: 1,
         height: 1,
@@ -167,9 +171,10 @@ describe('Sublime Adapter', function() {
         currency: 'USD',
         netRevenue: true,
         ttl: 600,
-        ad: '',
+        ad: '<!-- Creative -->',
       };
-      expect(result).to.deep.equal(expectedResponse);
+
+      expect(result[0]).to.deep.equal(expectedResponse);
     });
   });
 });
