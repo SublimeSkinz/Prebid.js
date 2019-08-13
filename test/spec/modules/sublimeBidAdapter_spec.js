@@ -2,37 +2,36 @@ import { expect } from 'chai';
 import { spec } from 'modules/sublimeBidAdapter';
 import { newBidder } from 'src/adapters/bidderFactory';
 
-describe('Sublime Adapter', () => {
+describe('Sublime Adapter', function () {
   const adapter = newBidder(spec);
 
-  describe('inherited functions', () => {
-    it('exists and is a function', () => {
+  describe('inherited functions', function () {
+    it('exists and is a function', function () {
       expect(adapter.callBids).to.exist.and.to.be.a('function');
     });
   });
 
-  describe('isBidRequestValid', () => {
+  describe('isBidRequestValid', function () {
     let bid = {
       bidder: 'sublime',
       params: {
         zoneId: 24549,
         endpoint: '',
-        sacHost: 'sac.ayads.co',
       },
     };
 
-    it('should return true when required params found', () => {
+    it('should return true when required params found', function () {
       expect(spec.isBidRequestValid(bid)).to.equal(true);
     });
 
-    it('should return false when required params are not passed', () => {
+    it('should return false when required params are not passed', function () {
       let bid = Object.assign({}, bid);
       bid.params = {};
       expect(spec.isBidRequestValid(bid)).to.equal(false);
     });
   });
 
-  describe('buildRequests', () => {
+  describe('buildRequests', function () {
     let bidRequests = [
       {
         bidder: 'sublime',
@@ -41,18 +40,17 @@ describe('Sublime Adapter', () => {
         sizes: [[1800, 1000], [640, 300]],
         requestId: 'xyz654',
         params: {
-          zoneId: 23651,
+          zoneId: 123,
           callbackName: 'false'
         }
       }, {
         bidder: 'sublime',
         adUnitCode: 'sublime_code_2',
         bidId: 'abc1234_2',
-        sizes: [[1800, 1000], [640, 300]],
+        sizes: [[1, 1]],
         requestId: 'xyz654_2',
         params: {
-          zoneId: 23651,
-          callbackName: 'false'
+          zoneId: 456,
         }
       }
     ];
@@ -61,34 +59,32 @@ describe('Sublime Adapter', () => {
       gdprConsent: {
         consentString: 'EOHEIRCOUCOUIEHZIOEIU-TEST',
         gdprApplies: true
+      },
+      refererInfo: {
+        referer: 'https://example.com',
+        numIframes: 2,
       }
     };
 
     let request = spec.buildRequests(bidRequests, bidderRequest);
 
-    it('should have a get method', () => {
-      expect(request.method).to.equal('GET');
+    it('should have a post method', function () {
+      expect(request[0].method).to.equal('POST');
+      expect(request[1].method).to.equal('POST');
     });
 
-    it('should contains window.sublime.gdpr.injected', () => {
-      expect(window.sublime).to.not.be.undefined;
-      expect(window.sublime.gdpr).to.not.be.undefined;
-      expect(window.sublime.gdpr.injected).to.eql({
-        consentString: bidderRequest.gdprConsent.consentString,
-        gdprApplies: bidderRequest.gdprConsent.gdprApplies
-      });
+    it('should contains a request id equals to the bid id', function () {
+      expect(request[0].data.requestId).to.equal(bidRequests[0].bidId);
+      expect(request[1].data.requestId).to.equal(bidRequests[1].bidId);
     });
 
-    it('should contains a request id equals to the bid id', () => {
-      expect(request.data.request_id).to.equal(bidRequests[0].bidId);
-    });
-
-    it('should have an url that contains bid keyword', () => {
-      expect(request.url).to.match(/bid/);
+    it('should have an url that contains bid keyword', function () {
+      expect(request[0].url).to.match(/bid/);
+      expect(request[1].url).to.match(/bid/);
     });
   });
 
-  describe('buildRequests: default arguments', () => {
+  describe('buildRequests: default arguments', function () {
     let bidRequests = [{
       bidder: 'sublime',
       adUnitCode: 'sublime_code',
@@ -96,29 +92,29 @@ describe('Sublime Adapter', () => {
       sizes: [[1800, 1000], [640, 300]],
       requestId: 'xyz654',
       params: {
-        zoneId: 23651
+        zoneId: 123
       }
     }];
 
     let request = spec.buildRequests(bidRequests);
 
-    it('should have an url that match the default endpoint', () => {
-      expect(request.url).to.equal('https://pbjs.sskzlabs.com/bid');
+    it('should have an url that match the default endpoint', function () {
+      expect(request[0].url).to.equal('https://pbjs.sskzlabs.com/bid');
     });
   });
 
-  describe('interpretResponse', () => {
+  describe('interpretResponse', function () {
     let serverResponse = {
       'request_id': '3db3773286ee59',
       'cpm': 0.5,
       'ad': '<!-- Creative -->',
     };
 
-    it('should get correct bid response', () => {
+    it('should get correct bid response', function () {
       // Mock the fire method
       top.window.sublime = {
         analytics: {
-          fire: function() {}
+          fire: function () { }
         }
       };
 
@@ -133,25 +129,127 @@ describe('Sublime Adapter', () => {
           currency: 'USD',
           netRevenue: true,
           ttl: 600,
-          referrer: '',
           ad: '',
         },
       ];
-      let result = spec.interpretResponse({body: serverResponse});
+      let result = spec.interpretResponse({ body: serverResponse });
       expect(Object.keys(result[0])).to.have.members(Object.keys(expectedResponse[0]));
     });
 
-    it('should get empty bid responses', () => {
-      let serverResponse = {};
-      let result = spec.interpretResponse({body: serverResponse});
-      expect(result).to.deep.equal([]);
-    });
-  });
+    it('should get correct default size for 1x1', function () {
+      let serverResponse = {
+        'requestId': 'xyz654_2',
+        'cpm': 0.5,
+        'ad': '<!-- Creative -->',
+      };
 
-  describe('getUserSyncs', () => {
-    it('should return an empty array', () => {
-      let syncs = spec.getUserSyncs();
-      expect(syncs).to.be.an('array').that.is.empty;
+      let bidRequest = {
+        bidder: 'sublime',
+        adUnitCode: 'sublime_code_2',
+        bidId: 'abc1234_2',
+        data: {
+          w: 1,
+          h: 1,
+        },
+        requestId: 'xyz654_2',
+        params: {
+          zoneId: 456,
+        }
+      };
+
+      let result = spec.interpretResponse({ body: serverResponse }, bidRequest);
+
+      let expectedResponse = {
+        requestId: 'xyz654_2',
+        cpm: 0.5,
+        width: 1,
+        height: 1,
+        creativeId: 1,
+        dealId: 1,
+        currency: 'EUR',
+        netRevenue: true,
+        ttl: 600,
+        ad: '<!-- Creative -->',
+      };
+
+      expect(result[0]).to.deep.equal(expectedResponse);
+    });
+
+    it('should return bid empty response', function () {
+      let serverResponse = '';
+      let bidRequest = {};
+
+      let result = spec.interpretResponse({ body: serverResponse }, bidRequest);
+
+      let expectedResponse = [];
+
+      expect(result).to.deep.equal(expectedResponse);
+    });
+
+    it('should return bid with default value in response', function () {
+      let serverResponse = {
+        'requestId': 'xyz654_2',
+        'ad': '<!-- ad -->',
+      };
+
+      let bidRequest = {
+        bidder: 'sublime',
+        adUnitCode: 'sublime_code_2',
+        bidId: 'abc1234_2',
+        data: {
+          w: 1,
+          h: 1,
+        },
+        requestId: 'xyz654_2',
+        params: {
+          zoneId: 456,
+        }
+      };
+
+      let result = spec.interpretResponse({ body: serverResponse }, bidRequest);
+
+      let expectedResponse = {
+        requestId: 'xyz654_2',
+        cpm: 0,
+        width: 1,
+        height: 1,
+        creativeId: 1,
+        dealId: 1,
+        currency: 'EUR',
+        netRevenue: true,
+        ttl: 600,
+        ad: '<!-- ad -->',
+      };
+
+      expect(result[0]).to.deep.equal(expectedResponse);
+    });
+
+    it('should return empty bid response because of timeout', function () {
+      let serverResponse = {
+        'requestId': 'xyz654_2',
+        'timeout': true,
+        'ad': '',
+      };
+
+      let bidRequest = {
+        bidder: 'sublime',
+        adUnitCode: 'sublime_code_2',
+        bidId: 'abc1234_2',
+        data: {
+          w: 1,
+          h: 1,
+        },
+        requestId: 'xyz654_2',
+        params: {
+          zoneId: 456,
+        }
+      };
+
+      let result = spec.interpretResponse({ body: serverResponse }, bidRequest);
+
+      let expectedResponse = [];
+
+      expect(result).to.deep.equal(expectedResponse);
     });
   });
 });
