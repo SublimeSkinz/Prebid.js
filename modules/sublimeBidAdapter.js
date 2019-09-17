@@ -8,6 +8,25 @@ const DEFAULT_PROTOCOL = 'https';
 const DEFAULT_TTL = 600;
 const SUBLIME_VERSION = '0.4.0';
 
+/**
+ * Send a pixel to antenna
+ * @param {String} name The pixel name
+ * @param {String} [requestId]
+ */
+function sendAntennaPixel(name, requestId) {
+  if (typeof top.sublime !== 'undefined' && typeof top.sublime.analytics !== 'undefined') {
+    let param = {
+      qs: {
+        z: SUBLIME_ZONE
+      }
+    };
+    if (requestId) {
+      param.qs.reqid = encodeURIComponent(requestId);
+    }
+    top.sublime.analytics.fire(SUBLIME_ZONE, name, param);
+  }
+}
+
 export const spec = {
   code: BIDDER_CODE,
   aliases: [],
@@ -30,6 +49,8 @@ export const spec = {
      * @return ServerRequest Info describing the request to the server.
      */
   buildRequests: (validBidRequests, bidderRequest) => {
+    window.sublime = window.sublime ? window.sublime : {};
+
     let commonPayload = {
       sublimeVersion: SUBLIME_VERSION,
       // Current Prebid params
@@ -47,7 +68,47 @@ export const spec = {
     if (bidderRequest && bidderRequest.gdprConsent) {
       commonPayload.gdprConsent = bidderRequest.gdprConsent.consentString;
       commonPayload.gdpr = bidderRequest.gdprConsent.gdprApplies; // we're handling the undefined case server side
+
+      // Injecting gdpr consent into sublime tag
+      window.sublime.gdpr = (typeof window.sublime.gdpr !== 'undefined') ? window.sublime.gdpr : {};
+      window.sublime.gdpr.injected = {
+        consentString: gdpr.consentString,
+        gdprApplies: gdpr.gdprApplies
+      };
     }
+
+    let sacHost = params.sacHost || DEFAULT_SAC_HOST;
+    let bidHost = params.bidHost || DEFAULT_BID_HOST;
+    let protocol = params.protocol || DEFAULT_PROTOCOL;
+    let callbackName = (params.callbackName || DEFAULT_CALLBACK_NAME) + '_' + params.zoneId;
+
+    // Register a callback to send notify
+    window[callbackName] = (response) => {
+      var hasAd = response.ad ? '1' : '0';
+      var xhr = new XMLHttpRequest();
+      var url = protocol + '://' + bidHost + '/notify';
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.send(JSON.stringify(
+        {
+          a: hasAd,
+          ad: response.ad || '',
+          cpm: response.cpm || 0,
+          currency: response.currency || 'USD',
+          notify: 1,
+          requestId: bid.bidId ? encodeURIComponent(bid.bidId) : null,
+          transactionId: bid.transactionId,
+          zoneId: params.zoneId || __SAC.ZONE_ID
+        }
+      ));
+      return xhr;
+    };
+
+    // Adding Sublime tag
+    let script = document.createElement('script');
+    script.type = 'application/javascript';
+    script.src = 'https://' + sacHost + '/sublime/' + SUBLIME_ZONE + '/prebid?callback=' + callbackName;
+    document.body.appendChild(script);
 
     return validBidRequests.map(bid => {
       let bidPayload = {
@@ -125,11 +186,17 @@ export const spec = {
         ad: response.ad,
       };
 
+      // TODO: Should we sent transactionId our requestId ?
+      sendAntennaPixel('bid', bidResponse.transactionId);
       bidResponses.push(bidResponse);
     }
 
     return bidResponses;
   },
+  // onTimeout: (bid) => {
+  //   // TODO: Use the pixel name we defined
+  //   sendAntennaPixel('timeout', {...bid});
+  // },
 };
 
 registerBidder(spec);
