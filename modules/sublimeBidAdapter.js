@@ -10,8 +10,7 @@ const DEFAULT_CURRENCY = 'EUR';
 const DEFAULT_PROTOCOL = 'https';
 const DEFAULT_SAC_HOST = 'sac.ayads.co'
 const DEFAULT_TTL = 600;
-// TODO: Find the URL
-const SUBLIME_ANTENNA = 'antenna.co.local/debug';
+const SUBLIME_ANTENNA = 'antenna.ayads.co';
 const SUBLIME_VERSION = '0.5.0';
 
 /**
@@ -23,10 +22,7 @@ function log(msg, obj) {
   utils.logInfo('SublimeBidAdapter - ' + msg, obj)
 }
 
-/**
- * Sublime Bid Adapter state
- * We use those information to send debug pixels
- */
+// Default state
 const state = {
   zoneId: '',
   gdpr: {
@@ -37,6 +33,10 @@ const state = {
   transactionId: ''
 };
 
+/**
+ * Set a new state
+ * @param {Object} value
+ */
 function setState(value) {
   Object.assign(state, value)
   log('State has been updated :', state)
@@ -137,7 +137,6 @@ function buildRequests(validBidRequests, bidderRequest) {
     window[callbackName] = (response) => {
       var hasAd = response.ad ? '1' : '0';
       var xhr = new XMLHttpRequest();
-      var url = protocol + '://' + bidHost + '/notify';
       var params = {
         a: hasAd,
         ad: response.ad || '',
@@ -148,11 +147,12 @@ function buildRequests(validBidRequests, bidderRequest) {
         transactionId: bid.transactionId,
         zoneId: bid.params.zoneId
       };
+      var queryString = Object.keys(params).map(function (key) {
+        return key + '=' + encodeURIComponent(params[key])
+      }).join('&');
+      var url = protocol + '://' + bidHost + '/notify?' + queryString;
 
-      xhr.open('POST', url + '?' +
-        Object.keys(params).map(function (key) {
-          return key + '=' + encodeURIComponent(params[key])
-        }).join('&'), true);
+      xhr.open('POST', url, true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       xhr.send();
       return xhr;
@@ -238,6 +238,10 @@ function interpretResponse(serverResponse, bidRequest) {
   return bidResponses;
 }
 
+/**
+ * Send debug when we timeout
+ * @param {Object} timeoutData
+ */
 function onTimeout(timeoutData) {
   log('Timeout from adapter', timeoutData);
   sendEvent('dbidtimeout');
