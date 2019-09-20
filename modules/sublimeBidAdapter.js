@@ -113,7 +113,7 @@ function buildRequests(validBidRequests, bidderRequest) {
     setState({
       transactionId: bid.transactionId,
       zoneId: bid.params.zoneId,
-      debug: params.debug || false,
+      debug: bid.params.debug || false,
     });
 
     // Adding Sublime tag
