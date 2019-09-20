@@ -19,17 +19,12 @@ const SUBLIME_VERSION = '0.5.0';
  * @param {Object} obj
  */
 function log(msg, obj) {
-  utils.logInfo('SublimeBidAdapter - ' + msg, obj)
+  utils.logInfo('SublimeBidAdapter - ' + msg, obj);
 }
 
 // Default state
 const state = {
   zoneId: '',
-  gdpr: {
-    consent: 0,
-    applies: 0,
-    source: false,
-  },
   transactionId: ''
 };
 
@@ -38,8 +33,8 @@ const state = {
  * @param {Object} value
  */
 function setState(value) {
-  Object.assign(state, value)
-  log('State has been updated :', state)
+  Object.assign(state, value);
+  log('State has been updated :', state);
 }
 
 /**
@@ -50,9 +45,6 @@ function sendEvent(eventName) {
   let eventObject = {
     tse: Date.now(),
     z: state.zoneId,
-    gm: state.gdpr.consent,
-    ga: state.gdpr.applies,
-    gs: state.gdpr.source,
     e: eventName,
     src: 'pa',
     trId: state.transactionId,
@@ -103,14 +95,6 @@ function buildRequests(validBidRequests, bidderRequest) {
     commonPayload.gdprConsent = bidderRequest.gdprConsent.consentString;
     commonPayload.gdpr = bidderRequest.gdprConsent.gdprApplies; // we're handling the undefined case server side
 
-    setState({
-      gdpr: {
-        consent: bidderRequest.gdprConsent.consentString ? 1 : 0,
-        applies: bidderRequest.gdprConsent.gdprApplies ? 1 : 0,
-        source: bidderRequest.gdprConsent.consentString ? 'cmp' : '',
-      }
-    });
-
     // Injecting gdpr consent into sublime tag
     window.sublime.gdpr = (typeof window.sublime.gdpr !== 'undefined') ? window.sublime.gdpr : {};
     window.sublime.gdpr.injected = {
@@ -150,11 +134,11 @@ function buildRequests(validBidRequests, bidderRequest) {
       var queryString = Object.keys(params).map(function (key) {
         return key + '=' + encodeURIComponent(params[key])
       }).join('&');
-      var url = protocol + '://' + bidHost + '/notify?' + queryString;
+      var url = protocol + '://' + bidHost + '/notify';
 
       xhr.open('POST', url, true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      xhr.send();
+      xhr.send(queryString);
       return xhr;
     };
 
@@ -198,6 +182,8 @@ function interpretResponse(serverResponse, bidRequest) {
   const bidResponses = [];
   const response = serverResponse.body;
 
+  sendEvent('dintres');
+
   if (response) {
     if (response.timeout || !response.ad || response.ad.match(/<!-- No ad -->/gmi)) {
       return bidResponses;
@@ -233,6 +219,8 @@ function interpretResponse(serverResponse, bidRequest) {
 
     sendEvent('bid');
     bidResponses.push(bidResponse);
+  } else {
+    sendEvent('dnobid');
   }
 
   return bidResponses;
