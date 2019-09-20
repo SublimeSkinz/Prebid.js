@@ -130,7 +130,7 @@ function buildRequests(validBidRequests, bidderRequest) {
     // Register a callback to send notify
     window[callbackName] = (response) => {
       function querify(params) {
-        Object.keys(params).map(function (key) {
+        return Object.keys(params).map(function (key) {
           return key + '=' + encodeURIComponent(params[key])
         }).join('&')
       }
