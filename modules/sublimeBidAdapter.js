@@ -40,9 +40,10 @@ function setState(value) {
 /**
  * Send pixel to our debug endpoint
  * @param {string} eventName - Event name that will be send in the e= query string
+ * @param {Boolean} isMandatoryPixel - If set to true, will always send the pixel
  */
-function sendEvent(eventName, isMendatoryPixel) {
-  let shoudNotSendPixel = !(isMendatoryPixel || state.debug);
+function sendEvent(eventName, isMandatoryPixel) {
+  let shoudSendPixel = (isMandatoryPixel || state.debug);
   let eventObject = {
     tse: Date.now(),
     z: state.zoneId,
@@ -52,12 +53,13 @@ function sendEvent(eventName, isMendatoryPixel) {
     ver: SUBLIME_VERSION,
   };
 
-  let queryString = url.formatQS(eventObject);
-  if (shoudNotSendPixel) {
-    log('Not sending pixel for event (use debug: true to send it): ' + eventName, eventObject);
-  } else {
+  if (shoudSendPixel) {
     log('Sending pixel for event: ' + eventName, eventObject);
+
+    let queryString = url.formatQS(eventObject);
     utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
+  } else {
+    log('Not sending pixel for event (use debug: true to send it): ' + eventName, eventObject);
   }
 }
 
@@ -68,7 +70,7 @@ function sendEvent(eventName, isMendatoryPixel) {
  * @return {Boolean} True if this is a valid bid, and false otherwise.
  */
 function isBidRequestValid(bid) {
-  return !!bid.params.zoneId;
+  return !!Number(bid.params.zoneId);
 }
 
 /**
@@ -79,7 +81,7 @@ function isBidRequestValid(bid) {
  * @return ServerRequest Info describing the request to the server.
  */
 function buildRequests(validBidRequests, bidderRequest) {
-  window.sublime = window.sublime ? window.sublime : {};
+  window.sublime = window.sublime || {};
 
   let commonPayload = {
     sublimeVersion: SUBLIME_VERSION,
@@ -100,7 +102,7 @@ function buildRequests(validBidRequests, bidderRequest) {
     commonPayload.gdpr = bidderRequest.gdprConsent.gdprApplies; // we're handling the undefined case server side
 
     // Injecting gdpr consent into sublime tag
-    window.sublime.gdpr = (typeof window.sublime.gdpr !== 'undefined') ? window.sublime.gdpr : {};
+    window.sublime.gdpr = window.sublime.gdpr || {};
     window.sublime.gdpr.injected = {
       consentString: bidderRequest.gdprConsent.consentString,
       gdprApplies: bidderRequest.gdprConsent.gdprApplies
@@ -127,21 +129,24 @@ function buildRequests(validBidRequests, bidderRequest) {
 
     // Register a callback to send notify
     window[callbackName] = (response) => {
+      function querify(params) {
+        Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+      }
+
       var hasAd = response.ad ? '1' : '0';
       var xhr = new XMLHttpRequest();
-      var params = {
+      var queryString = querify({
         a: hasAd,
         ad: response.ad || '',
         cpm: response.cpm || 0,
-        currency: response.currency || 'USD',
+        currency: response.currency || DEFAULT_CURRENCY,
         notify: 1,
         requestId: bid.bidId ? encodeURIComponent(bid.bidId) : null,
         transactionId: bid.transactionId,
         zoneId: bid.params.zoneId
-      };
-      var queryString = Object.keys(params).map(function (key) {
-        return key + '=' + encodeURIComponent(params[key])
-      }).join('&');
+      });
       var url = protocol + '://' + bidHost + '/notify';
 
       xhr.open('POST', url, true);
