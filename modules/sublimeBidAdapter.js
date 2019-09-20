@@ -41,7 +41,8 @@ function setState(value) {
  * Send pixel to our debug endpoint
  * @param {string} eventName - Event name that will be send in the e= query string
  */
-function sendEvent(eventName) {
+function sendEvent(eventName, isMendatoryPixel) {
+  let shoudNotSendPixel = !(isMendatoryPixel || state.debug);
   let eventObject = {
     tse: Date.now(),
     z: state.zoneId,
@@ -54,7 +55,7 @@ function sendEvent(eventName) {
   let queryString = url.formatQS(eventObject);
 
   log('Sending pixel for event: ' + eventName, eventObject);
-  utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
+  shoudNotSendPixel || utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
 }
 
 /**
@@ -109,7 +110,11 @@ function buildRequests(validBidRequests, bidderRequest) {
     let protocol = bid.params.protocol || DEFAULT_PROTOCOL;
     let sacHost = bid.params.sacHost || DEFAULT_SAC_HOST;
 
-    setState({ transactionId: bid.transactionId, zoneId: bid.params.zoneId });
+    setState({
+      transactionId: bid.transactionId,
+      zoneId: bid.params.zoneId,
+      debug: params.debug || false,
+    });
 
     // Adding Sublime tag
     let script = document.createElement('script');
@@ -217,7 +222,7 @@ function interpretResponse(serverResponse, bidRequest) {
       ad: response.ad,
     };
 
-    sendEvent('bid');
+    sendEvent('bid', true);
     bidResponses.push(bidResponse);
   } else {
     sendEvent('dnobid');
