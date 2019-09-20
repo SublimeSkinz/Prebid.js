@@ -53,9 +53,12 @@ function sendEvent(eventName, isMendatoryPixel) {
   };
 
   let queryString = url.formatQS(eventObject);
-
-  log('Sending pixel for event: ' + eventName, eventObject);
-  shoudNotSendPixel || utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
+  if (shoudNotSendPixel) {
+    log('Not sending pixel for event (use debug: true to send it): ' + eventName, eventObject);
+  } else {
+    log('Sending pixel for event: ' + eventName, eventObject);
+    utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
+  }
 }
 
 /**
