@@ -112,79 +112,85 @@ function buildRequests(validBidRequests, bidderRequest) {
     };
   }
 
-  return validBidRequests.map(bid => {
-    let bidHost = bid.params.bidHost || DEFAULT_BID_HOST;
-    let callbackName = (bid.params.callbackName || DEFAULT_CALLBACK_NAME) + '_' + bid.params.zoneId;
-    let protocol = bid.params.protocol || DEFAULT_PROTOCOL;
-    let sacHost = bid.params.sacHost || DEFAULT_SAC_HOST;
+  // Grab only the first `validBidRequest`
+  let bid = validBidRequests[0];
 
-    setState({
-      transactionId: bid.transactionId,
-      zoneId: bid.params.zoneId,
-      debug: bid.params.debug || false,
-    });
+  if (validBidRequests.length > 1) {
+    let leftoverZonesIds = validBidRequests.slice(1).map(bid => { return bid.params.zoneId }).join(',');
+    utils.logWarn(`SublimeBidAdapter - ZoneIds ${leftoverZonesIds} are ignored. Only one ZoneId per page can be instanciated.`);
+  }
 
-    // Adding Sublime tag
-    let script = document.createElement('script');
-    script.type = 'application/javascript';
-    script.src = 'https://' + sacHost + '/sublime/' + bid.params.zoneId + '/prebid?callback=' + callbackName;
-    document.body.appendChild(script);
+  let bidHost = bid.params.bidHost || DEFAULT_BID_HOST;
+  let callbackName = (bid.params.callbackName || DEFAULT_CALLBACK_NAME) + '_' + bid.params.zoneId;
+  let protocol = bid.params.protocol || DEFAULT_PROTOCOL;
+  let sacHost = bid.params.sacHost || DEFAULT_SAC_HOST;
 
-    // Register a callback to send notify
-    window[callbackName] = (response) => {
-      function querify(params) {
-        return Object.keys(params).map(function (key) {
-          return key + '=' + encodeURIComponent(params[key])
-        }).join('&')
-      }
-
-      var hasAd = response.ad ? '1' : '0';
-      var xhr = new XMLHttpRequest();
-      var queryString = querify({
-        a: hasAd,
-        ad: response.ad || '',
-        cpm: response.cpm || 0,
-        currency: response.currency || DEFAULT_CURRENCY,
-        notify: 1,
-        requestId: bid.bidId ? encodeURIComponent(bid.bidId) : null,
-        transactionId: bid.transactionId,
-        zoneId: bid.params.zoneId
-      });
-      var url = protocol + '://' + bidHost + '/notify';
-
-      xhr.open('POST', url, true);
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      xhr.send(queryString);
-      return xhr;
-    };
-
-    let bidPayload = {
-      adUnitCode: bid.adUnitCode,
-      auctionId: bid.auctionId,
-      bidder: bid.bidder,
-      bidderRequestId: bid.bidderRequestId,
-      bidRequestsCount: bid.bidRequestsCount,
-      requestId: bid.bidId,
-      sizes: bid.sizes.map(size => ({
-        w: size[0],
-        h: size[1],
-      })),
-      transactionId: bid.transactionId,
-      zoneId: bid.params.zoneId,
-    };
-
-    let payload = Object.assign({}, commonPayload, bidPayload);
-
-    return {
-      method: 'POST',
-      url: protocol + '://' + bidHost + '/bid',
-      data: payload,
-      options: {
-        contentType: 'application/json',
-        withCredentials: true
-      },
-    };
+  setState({
+    transactionId: bid.transactionId,
+    zoneId: bid.params.zoneId,
+    debug: bid.params.debug || false,
   });
+
+  // Adding Sublime tag
+  let script = document.createElement('script');
+  script.type = 'application/javascript';
+  script.src = 'https://' + sacHost + '/sublime/' + bid.params.zoneId + '/prebid?callback=' + callbackName;
+  document.body.appendChild(script);
+
+  // Register a callback to send notify
+  window[callbackName] = (response) => {
+    function querify(params) {
+      return Object.keys(params).map(function (key) {
+        return key + '=' + encodeURIComponent(params[key])
+      }).join('&')
+    }
+
+    var hasAd = response.ad ? '1' : '0';
+    var xhr = new XMLHttpRequest();
+    var queryString = querify({
+      a: hasAd,
+      ad: response.ad || '',
+      cpm: response.cpm || 0,
+      currency: response.currency || DEFAULT_CURRENCY,
+      notify: 1,
+      requestId: bid.bidId ? encodeURIComponent(bid.bidId) : null,
+      transactionId: bid.transactionId,
+      zoneId: bid.params.zoneId
+    });
+    var url = protocol + '://' + bidHost + '/notify';
+
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(queryString);
+    return xhr;
+  };
+
+  let bidPayload = {
+    adUnitCode: bid.adUnitCode,
+    auctionId: bid.auctionId,
+    bidder: bid.bidder,
+    bidderRequestId: bid.bidderRequestId,
+    bidRequestsCount: bid.bidRequestsCount,
+    requestId: bid.bidId,
+    sizes: bid.sizes.map(size => ({
+      w: size[0],
+      h: size[1],
+    })),
+    transactionId: bid.transactionId,
+    zoneId: bid.params.zoneId,
+  };
+
+  let payload = Object.assign({}, commonPayload, bidPayload);
+
+  return {
+    method: 'POST',
+    url: protocol + '://' + bidHost + '/bid',
+    data: payload,
+    options: {
+      contentType: 'application/json',
+      withCredentials: true
+    },
+  };
 }
 
 /**
