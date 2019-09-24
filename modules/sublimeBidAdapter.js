@@ -64,6 +64,24 @@ function sendEvent(eventName, isMandatoryPixel) {
 }
 
 /**
+ * Function sendPixel, use it to send pixel to antenna
+ * @param {String} pixelName
+ */
+function sendPixel(pixelName) {
+  let pixelObject = {
+    t: Date.now(),
+    z: state.zoneId,
+    e: pixelName,
+    et: Math.round(window.performance.now()),
+  };
+
+  log('Sending pixel: ' + pixelName, pixelObject);
+
+  let queryString = url.formatQS(pixelObject);
+  utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
+}
+
+/**
  * Determines whether or not the given bid request is valid.
  *
  * @param {BidRequest} bid The bid params to validate.
@@ -230,7 +248,11 @@ function interpretResponse(serverResponse, bidRequest) {
       ad: response.ad,
     };
 
+    // Timing debug bid pixel
     sendEvent('bid', true);
+
+    // Count bid pixel
+    sendPixel('bid');
     bidResponses.push(bidResponse);
   } else {
     sendEvent('dnobid');
@@ -245,7 +267,7 @@ function interpretResponse(serverResponse, bidRequest) {
  */
 function onTimeout(timeoutData) {
   log('Timeout from adapter', timeoutData);
-  sendEvent('dbidtimeout');
+  sendEvent('dbidtimeout', true);
 }
 
 export const spec = {
