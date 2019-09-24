@@ -44,11 +44,14 @@ function setState(value) {
  */
 function sendEvent(eventName, isMandatoryPixel) {
   let shoudSendPixel = (isMandatoryPixel || state.debug);
+  let ts = Date.now();
   let eventObject = {
-    tse: Date.now(),
+    t: ts,
+    tse: ts,
     z: state.zoneId,
     e: eventName,
     src: 'pa',
+    puid: state.transactionId,
     trId: state.transactionId,
     ver: SUBLIME_VERSION,
   };
@@ -61,24 +64,6 @@ function sendEvent(eventName, isMandatoryPixel) {
   } else {
     log('Not sending pixel for event (use debug: true to send it): ' + eventName, eventObject);
   }
-}
-
-/**
- * Function sendPixel, use it to send pixel to antenna
- * @param {String} pixelName
- */
-function sendPixel(pixelName) {
-  let pixelObject = {
-    t: Date.now(),
-    z: state.zoneId,
-    e: pixelName,
-    et: Math.round(window.performance.now()),
-  };
-
-  log('Sending pixel: ' + pixelName, pixelObject);
-
-  let queryString = url.formatQS(pixelObject);
-  utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
 }
 
 /**
@@ -248,11 +233,7 @@ function interpretResponse(serverResponse, bidRequest) {
       ad: response.ad,
     };
 
-    // Timing debug bid pixel
     sendEvent('bid', true);
-
-    // Count bid pixel
-    sendPixel('bid');
     bidResponses.push(bidResponse);
   } else {
     sendEvent('dnobid');
