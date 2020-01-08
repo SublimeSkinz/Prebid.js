@@ -6,7 +6,7 @@ const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_CURRENCY = 'EUR';
 const DEFAULT_PROTOCOL = 'https';
 const DEFAULT_TTL = 600;
-const SUBLIME_VERSION = '0.4.0';
+const SUBLIME_VERSION = '0.5.1';
 
 export const spec = {
   code: BIDDER_CODE,
@@ -31,7 +31,7 @@ export const spec = {
      */
   buildRequests: (validBidRequests, bidderRequest) => {
     let commonPayload = {
-      sublimeVersion: SUBLIME_VERSION,
+      pbav: SUBLIME_VERSION,
       // Current Prebid params
       prebidVersion: '$prebid.version$',
       currencyCode: config.getConfig('currency.adServerCurrency') || DEFAULT_CURRENCY,
@@ -123,6 +123,7 @@ export const spec = {
         netRevenue: response.netRevenue || true,
         ttl: response.ttl || DEFAULT_TTL,
         ad: response.ad,
+        pbav: SUBLIME_VERSION
       };
 
       bidResponses.push(bidResponse);
