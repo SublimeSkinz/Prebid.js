@@ -103,6 +103,15 @@ describe('Sublime Adapter', function() {
     });
   });
 
+  // describe('sendEvent', function() {
+  //   sandbox = sinon.sandbox.create();
+  //   sandbox.stub('log');
+
+  //   spec.sendEvent('test', true);
+
+  //   sandbox.firstCall();
+  // });
+
   describe('interpretResponse', function() {
     let serverResponse = {
       'request_id': '3db3773286ee59',
@@ -129,6 +138,7 @@ describe('Sublime Adapter', function() {
           currency: 'USD',
           netRevenue: true,
           ttl: 600,
+          pbav: '0.5.1',
           ad: '',
         },
       ];
@@ -170,6 +180,7 @@ describe('Sublime Adapter', function() {
         netRevenue: true,
         ttl: 600,
         ad: '<!-- Creative -->',
+        pbav: '0.5.1',
       };
 
       expect(result[0]).to.deep.equal(expectedResponse);
@@ -219,6 +230,7 @@ describe('Sublime Adapter', function() {
         netRevenue: true,
         ttl: 600,
         ad: '<!-- ad -->',
+        pbav: '0.5.1',
       };
 
       expect(result[0]).to.deep.equal(expectedResponse);
@@ -250,6 +262,10 @@ describe('Sublime Adapter', function() {
       let expectedResponse = [];
 
       expect(result).to.deep.equal(expectedResponse);
+
+      describe('On bid Time out', function () {
+        spec.onTimeout(result);
+      });
     });
   });
 });
