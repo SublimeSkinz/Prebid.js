@@ -16,12 +16,12 @@ const SUBLIME_VERSION = '0.5.1';
  * @param {String} msg
  * @param {Object=} obj
  */
-function log(msg, obj) {
+export function log(msg, obj) {
   utils.logInfo('SublimeBidAdapter - ' + msg, obj);
 }
 
 // Default state
-const state = {
+export const state = {
   zoneId: '',
   transactionId: ''
 };
@@ -30,7 +30,7 @@ const state = {
  * Set a new state
  * @param {Object} value
  */
-function setState(value) {
+export function setState(value) {
   Object.assign(state, value);
   log('State has been updated :', state);
 }
@@ -40,7 +40,7 @@ function setState(value) {
  * @param {string} eventName - Event name that will be send in the e= query string
  * @param {Boolean=} isMandatoryPixel - If set to true, will always send the pixel
  */
-function sendEvent(eventName, isMandatoryPixel = false) {
+export function sendEvent(eventName, isMandatoryPixel = false) {
   const shoudSendPixel = (isMandatoryPixel || state.debug);
   const ts = Date.now();
   const eventObject = {

@@ -1,9 +1,29 @@
 import { expect } from 'chai';
-import { spec } from 'modules/sublimeBidAdapter.js';
+import { spec, sendEvent, log, setState, state } from 'modules/sublimeBidAdapter.js';
 import { newBidder } from 'src/adapters/bidderFactory.js';
+
+let utils = require('src/utils');
 
 describe('Sublime Adapter', function() {
   const adapter = newBidder(spec);
+
+  describe('sendEvent', function() {
+    let sandbox;
+
+    beforeEach(function () {
+      sandbox = sinon.sandbox.create();
+    });
+
+    it('should trigger pixel', function () {
+      sandbox.spy(utils, 'triggerPixel');
+      sendEvent('test', true);
+      expect(utils.triggerPixel.called).to.equal(true);
+    });
+
+    afterEach(function () {
+      sandbox.restore();
+    });
+  })
 
   describe('inherited functions', function() {
     it('exists and is a function', function() {
@@ -102,15 +122,6 @@ describe('Sublime Adapter', function() {
       expect(request[0].url).to.equal('https://pbjs.sskzlabs.com/bid');
     });
   });
-
-  // describe('sendEvent', function() {
-  //   sandbox = sinon.sandbox.create();
-  //   sandbox.stub('log');
-
-  //   spec.sendEvent('test', true);
-
-  //   sandbox.firstCall();
-  // });
 
   describe('interpretResponse', function() {
     let serverResponse = {
