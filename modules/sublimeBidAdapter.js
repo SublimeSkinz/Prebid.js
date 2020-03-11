@@ -82,8 +82,6 @@ function isBidRequestValid(bid) {
  * @return {ServerRequest|ServerRequest[]} - Info describing the request to the server.
  */
 function buildRequests(validBidRequests, bidderRequest) {
-  window.sublime = window.sublime || {};
-
   const commonPayload = {
     pbav: SUBLIME_VERSION,
     // Current Prebid params
