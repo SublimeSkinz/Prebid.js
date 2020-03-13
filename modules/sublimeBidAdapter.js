@@ -187,7 +187,7 @@ function interpretResponse(serverResponse, bidRequest) {
       pbav: SUBLIME_VERSION
     };
 
-    sendEvent('bid', true);
+    sendEvent('bida', true);
     bidResponses.push(bidResponse);
   } else {
     sendEvent('dnobid');
