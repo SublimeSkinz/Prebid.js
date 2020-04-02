@@ -11,7 +11,7 @@ const DEFAULT_PROTOCOL = 'https';
 const DEFAULT_SAC_HOST = 'sac.ayads.co'
 const DEFAULT_TTL = 600;
 const SUBLIME_ANTENNA = 'antenna.ayads.co';
-const SUBLIME_VERSION = '0.5.1-bundle';
+const SUBLIME_VERSION = '0.5.2-bundle';
 
 /**
  * Debug log message
