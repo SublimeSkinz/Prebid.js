@@ -9,7 +9,7 @@ const DEFAULT_CURRENCY = 'EUR';
 const DEFAULT_PROTOCOL = 'https';
 const DEFAULT_TTL = 600;
 const SUBLIME_ANTENNA = 'antenna.ayads.co';
-const SUBLIME_VERSION = '0.5.1';
+const SUBLIME_VERSION = '0.5.2';
 
 /**
  * Debug log message
