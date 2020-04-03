@@ -11,7 +11,7 @@ const DEFAULT_PROTOCOL = 'https';
 const DEFAULT_SAC_HOST = 'sac.ayads.co'
 const DEFAULT_TTL = 600;
 const SUBLIME_ANTENNA = 'antenna.ayads.co';
-const SUBLIME_VERSION = '0.5.1-bundle';
+const SUBLIME_VERSION = '0.5.2-bundle';
 
 /**
  * Debug log message
@@ -242,13 +242,22 @@ function interpretResponse(serverResponse, bidRequest) {
       pbav: SUBLIME_VERSION
     };
 
-    sendEvent('bid', true);
+    sendEvent('bida', true);
     bidResponses.push(bidResponse);
   } else {
     sendEvent('dnobid');
   }
 
   return bidResponses;
+}
+
+/**
+ * Send pixel when bidWon event is triggered
+ * @param {Object} timeoutData
+ */
+function onBidWon(bid) {
+  log('Bid won', bid);
+  sendEvent('bidwon', true);
 }
 
 /**
@@ -266,6 +275,7 @@ export const spec = {
   isBidRequestValid: isBidRequestValid,
   buildRequests: buildRequests,
   interpretResponse: interpretResponse,
+  onBidWon: onBidWon,
   onTimeout: onTimeout,
 };
 
