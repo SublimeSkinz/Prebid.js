@@ -4,6 +4,7 @@ import * as utils from '../src/utils.js';
 import * as url from '../src/url.js';
 
 const BIDDER_CODE = 'sublime';
+const BIDDER_GVLID = 114;
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_CURRENCY = 'EUR';
 const DEFAULT_PROTOCOL = 'https';
@@ -200,11 +201,12 @@ function onBidWon(bid) {
  */
 function onTimeout(timeoutData) {
   log('Timeout from adapter', timeoutData);
-  sendEvent('dbidtimeout', true);
+  sendEvent('bidtimeout', true);
 }
 
 export const spec = {
   code: BIDDER_CODE,
+  gvlid: BIDDER_GVLID,
   aliases: [],
   isBidRequestValid: isBidRequestValid,
   buildRequests: buildRequests,
