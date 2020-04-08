@@ -192,7 +192,7 @@ function interpretResponse(serverResponse, bidRequest) {
  */
 function onBidWon(bid) {
   log('Bid won', bid);
-  sendEvent('bidwon', true);
+  sendEvent('bidwon');
 }
 
 /**
@@ -201,7 +201,7 @@ function onBidWon(bid) {
  */
 function onTimeout(timeoutData) {
   log('Timeout from adapter', timeoutData);
-  sendEvent('bidtimeout', true);
+  sendEvent('bidtimeout');
 }
 
 export const spec = {
