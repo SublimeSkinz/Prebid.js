@@ -4,9 +4,9 @@
  * information and make it available for any USP (CCPA) supported adapters to
  * read/pass this information to their system.
  */
-import * as utils from '../src/utils';
-import { config } from '../src/config';
-import { uspDataHandler } from '../src/adapterManager';
+import * as utils from '../src/utils.js';
+import { config } from '../src/config.js';
+import { uspDataHandler } from '../src/adapterManager.js';
 
 const DEFAULT_CONSENT_API = 'iab';
 const DEFAULT_CONSENT_TIMEOUT = 50;
@@ -157,11 +157,6 @@ export function requestBidsHook(fn, reqBidsConfigObj) {
     haveExited: false,
     timer: null
   };
-
-  // in case we already have consent (eg during bid refresh)
-  if (consentData) {
-    return exitModule(null, hookConfig);
-  }
 
   if (!uspCallMap[consentAPI]) {
     utils.logWarn(`USP framework (${consentAPI}) is not a supported framework. Aborting consentManagement module and resuming auction.`);

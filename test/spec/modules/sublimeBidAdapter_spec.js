@@ -1,9 +1,29 @@
 import { expect } from 'chai';
-import { spec } from 'modules/sublimeBidAdapter';
-import { newBidder } from 'src/adapters/bidderFactory';
+import { spec, sendEvent, log, setState, state } from 'modules/sublimeBidAdapter.js';
+import { newBidder } from 'src/adapters/bidderFactory.js';
+
+let utils = require('src/utils');
 
 describe('Sublime Adapter', function() {
   const adapter = newBidder(spec);
+
+  describe('sendEvent', function() {
+    let sandbox;
+
+    beforeEach(function () {
+      sandbox = sinon.sandbox.create();
+    });
+
+    it('should trigger pixel', function () {
+      sandbox.spy(utils, 'triggerPixel');
+      sendEvent('test', true);
+      expect(utils.triggerPixel.called).to.equal(true);
+    });
+
+    afterEach(function () {
+      sandbox.restore();
+    });
+  })
 
   describe('inherited functions', function() {
     it('exists and is a function', function() {
@@ -126,6 +146,7 @@ describe('Sublime Adapter', function() {
           currency: 'USD',
           netRevenue: true,
           ttl: 600,
+          pbav: '0.5.2',
           ad: '',
         },
       ];
@@ -167,6 +188,7 @@ describe('Sublime Adapter', function() {
         netRevenue: true,
         ttl: 600,
         ad: '<!-- Creative -->',
+        pbav: '0.5.2',
       };
 
       expect(result[0]).to.deep.equal(expectedResponse);
@@ -216,6 +238,7 @@ describe('Sublime Adapter', function() {
         netRevenue: true,
         ttl: 600,
         ad: '<!-- ad -->',
+        pbav: '0.5.2',
       };
 
       expect(result[0]).to.deep.equal(expectedResponse);
@@ -247,6 +270,10 @@ describe('Sublime Adapter', function() {
       let expectedResponse = [];
 
       expect(result).to.deep.equal(expectedResponse);
+
+      describe('On bid Time out', function () {
+        spec.onTimeout(result);
+      });
     });
   });
 });

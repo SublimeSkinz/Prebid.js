@@ -1,9 +1,9 @@
-import { registerBidder } from '../src/adapters/bidderFactory';
-import { config } from '../src/config';
-import * as utils from '../src/utils';
-import * as url from '../src/url';
+import { registerBidder } from '../src/adapters/bidderFactory.js';
+import { config } from '../src/config.js';
+import * as utils from '../src/utils.js';
 
 const BIDDER_CODE = 'sublime';
+const BIDDER_GVLID = 114;
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_CALLBACK_NAME = 'sublime_prebid_callback';
 const DEFAULT_CURRENCY = 'EUR';
@@ -59,7 +59,7 @@ function sendEvent(eventName, isMandatoryPixel = false) {
   if (shoudSendPixel) {
     log('Sending pixel for event: ' + eventName, eventObject);
 
-    let queryString = url.formatQS(eventObject);
+    let queryString = utils.formatQS(eventObject);
     utils.triggerPixel('https://' + SUBLIME_ANTENNA + '/?' + queryString);
   } else {
     log('Not sending pixel for event (use debug: true to send it): ' + eventName, eventObject);
