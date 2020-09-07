@@ -48,8 +48,8 @@ export function sendEvent(eventName) {
     z: state.zoneId,
     e: eventName,
     src: 'pa',
-    puid: state.transactionId,
-    trId: state.transactionId,
+    puid: state.transactionId || state.notifyId,
+    trId: state.transactionId || state.notifyId,
     ver: SUBLIME_VERSION,
   };
 
