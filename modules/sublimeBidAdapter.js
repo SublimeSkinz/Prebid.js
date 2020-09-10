@@ -185,7 +185,7 @@ function buildRequests(validBidRequests, bidderRequest) {
     return {
       method: 'POST',
       url: protocol + '://' + bidHost + '/bid',
-      data: payload,
+      data: JSON.stringify(payload),
       options: {
         contentType: 'text/plain',
         withCredentials: false
@@ -271,6 +271,7 @@ function onTimeout(timeoutData) {
 export const spec = {
   code: BIDDER_CODE,
   aliases: [],
+  sendEvent: sendEvent,
   isBidRequestValid: isBidRequestValid,
   buildRequests: buildRequests,
   interpretResponse: interpretResponse,
