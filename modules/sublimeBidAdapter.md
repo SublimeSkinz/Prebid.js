@@ -62,4 +62,4 @@ var adUnits = [{
 
 Where you replace:
 - `<zoneId>` by your Sublime Zone id;
-- `<notifyId>` by a random Id
+- `<notifyId>` by your Sublime Notify id
