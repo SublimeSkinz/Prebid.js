@@ -3,7 +3,6 @@ import { config } from '../src/config.js';
 import * as utils from '../src/utils.js';
 
 const BIDDER_CODE = 'sublime';
-const BIDDER_GVLID = 114;
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_CALLBACK_NAME = 'sublime_prebid_callback';
 const DEFAULT_CURRENCY = 'EUR';
