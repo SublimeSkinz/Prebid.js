@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { spec } from 'modules/sublimeBidAdapter.js';
+import { spec } from 'modules/sublimeBundleBidAdapter.js';
 import { newBidder } from 'src/adapters/bidderFactory.js';
 
 let utils = require('src/utils');
