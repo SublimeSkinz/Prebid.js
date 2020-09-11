@@ -9,7 +9,7 @@ Maintainer: pbjs@sublimeskinz.com
 # Description
 
 Connects to Sublime for bids.
-Sublime bid adapter supports Skinz and M-Skinz formats.
+Sublime bid adapter supports Skinz.
 
 # Nota Bene
 
