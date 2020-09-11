@@ -3,7 +3,6 @@ import { config } from '../src/config.js';
 import * as utils from '../src/utils.js';
 
 const BIDDER_CODE = 'sublime';
-const BIDDER_GVLID = 114;
 const DEFAULT_BID_HOST = 'pbjs.sskzlabs.com';
 const DEFAULT_CALLBACK_NAME = 'sublime_prebid_callback';
 const DEFAULT_CURRENCY = 'EUR';
@@ -11,7 +10,7 @@ const DEFAULT_PROTOCOL = 'https';
 const DEFAULT_SAC_HOST = 'sac.ayads.co'
 const DEFAULT_TTL = 600;
 const SUBLIME_ANTENNA = 'antenna.ayads.co';
-const SUBLIME_VERSION = '0.5.2-bundle';
+const SUBLIME_VERSION = '0.6.1-bundle';
 
 /**
  * Debug log message
@@ -186,10 +185,10 @@ function buildRequests(validBidRequests, bidderRequest) {
     return {
       method: 'POST',
       url: protocol + '://' + bidHost + '/bid',
-      data: payload,
+      data: JSON.stringify(payload),
       options: {
-        contentType: 'application/json',
-        withCredentials: true
+        contentType: 'text/plain',
+        withCredentials: false
       },
     }
   });
@@ -272,6 +271,7 @@ function onTimeout(timeoutData) {
 export const spec = {
   code: BIDDER_CODE,
   aliases: [],
+  sendEvent: sendEvent,
   isBidRequestValid: isBidRequestValid,
   buildRequests: buildRequests,
   interpretResponse: interpretResponse,
