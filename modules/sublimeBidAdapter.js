@@ -50,7 +50,7 @@ export function sendEvent(eventName) {
     src: 'pa',
     puid: state.transactionId || state.notifyId,
     trId: state.transactionId || state.notifyId,
-    ver: SUBLIME_VERSION,
+    pbav: SUBLIME_VERSION,
   };
 
   log('Sending pixel for event: ' + eventName, eventObject);
