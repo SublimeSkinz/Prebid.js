@@ -9,6 +9,16 @@ describe('Sublime Adapter', function() {
 
   describe('sendEvent', function() {
     let sandbox;
+    const triggeredPixelProperties = [
+      't',
+      'tse',
+      'z',
+      'e',
+      'src',
+      'puid',
+      'trId',
+      'pbav',
+    ];
 
     beforeEach(function () {
       sandbox = sinon.sandbox.create();
@@ -16,8 +26,10 @@ describe('Sublime Adapter', function() {
 
     it('should trigger pixel', function () {
       sandbox.spy(utils, 'triggerPixel');
-      spec.sendEvent('test', true);
+      spec.sendEvent('test');
       expect(utils.triggerPixel.called).to.equal(true);
+      const params = utils.parseUrl(utils.triggerPixel.args[0][0]).search;
+      expect(Object.keys(params)).to.have.members(triggeredPixelProperties);
     });
 
     afterEach(function () {
@@ -280,4 +292,24 @@ describe('Sublime Adapter', function() {
       });
     });
   });
+
+  describe('onBidWon', function() {
+    let sandbox;
+    let bid = { foo: 'bar' };
+
+    beforeEach(function () {
+      sandbox = sinon.sandbox.create();
+    });
+
+    it('should trigger "bidwon" pixel', function () {
+      sandbox.spy(utils, 'triggerPixel');
+      spec.onBidWon(bid);
+      const params = utils.parseUrl(utils.triggerPixel.args[0][0]).search;
+      expect(params.e).to.equal('bidwon');
+    });
+
+    afterEach(function () {
+      sandbox.restore();
+    });
+  })
 });
