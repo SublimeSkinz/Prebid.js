@@ -16,7 +16,7 @@ describe('Sublime Adapter', function() {
       'e',
       'src',
       'puid',
-      'trId',
+      'notid',
       'pbav',
       'pubpbv',
       'device',
