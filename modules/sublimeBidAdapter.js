@@ -66,7 +66,7 @@ export function sendEvent(eventName, sspName) {
     e: eventName,
     src: 'pa',
     puid: state.transactionId || state.notifyId,
-    notid: state.notifyId,
+    notid: state.notifyId || '',
     pbav: SUBLIME_VERSION,
     pubtimeout: config.getConfig('bidderTimeout'),
     pubpbv: '$prebid.version$',
