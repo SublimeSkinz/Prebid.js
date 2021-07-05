@@ -40,7 +40,8 @@ export function log(msg, obj) {
 export const state = {
   zoneId: '',
   transactionId: '',
-  notifyId: ''
+  notifyId: '',
+  timeout: config.getConfig('bidderTimeout'),
 };
 
 /**
@@ -68,7 +69,7 @@ export function sendEvent(eventName, sspName) {
     puid: state.transactionId || state.notifyId,
     notid: state.notifyId || '',
     pbav: SUBLIME_VERSION,
-    pubtimeout: config.getConfig('bidderTimeout'),
+    pubtimeout: state.timeout,
     pubpbv: '$prebid.version$',
     device: detectDevice(),
   };
@@ -234,6 +235,8 @@ function onBidWon(bid) {
  */
 function onTimeout(timeoutData) {
   log('Timeout from adapter', timeoutData);
+  // Set timeout to the one we got from the bid
+  setState({timeout: timeoutData.timeout});
   sendEvent('bidtimeout');
 }
 
