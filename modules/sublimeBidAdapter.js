@@ -244,12 +244,15 @@ export const spec = {
   code: BIDDER_CODE,
   gvlid: BIDDER_GVLID,
   aliases: [],
-  sendEvent: sendEvent,
   isBidRequestValid: isBidRequestValid,
   buildRequests: buildRequests,
   interpretResponse: interpretResponse,
   onBidWon: onBidWon,
   onTimeout: onTimeout,
+  // Exposed for test purpose
+  sendEvent: sendEvent,
+  setState: setState,
+  state: state,
 };
 
 registerBidder(spec);

@@ -337,5 +337,32 @@ describe('Sublime Adapter', function() {
     afterEach(function () {
       sandbox.restore();
     });
+  });
+
+  describe('onTimeout', function() {
+    let sandbox;
+    const timeoutData = {
+      timeout: 1234
+    };
+
+    beforeEach(function() {
+      sandbox = sinon.sandbox.create();
+    });
+
+    it('should trigger "bidtimeout" pixel', function () {
+      sandbox.spy(utils, 'triggerPixel');
+      spec.onTimeout(timeoutData);
+      const params = utils.parseUrl(utils.triggerPixel.args[0][0]).search;
+      expect(params.e).to.equal('bidtimeout');
+    });
+
+    it('should set timeout value in state', function () {
+      spec.onTimeout(timeoutData);
+      assert.deepStrictEqual(spec.state, { timeout: 1234, debug: false, notifyId: undefined, transactionId: undefined, zoneId: 123 })
+    });
+
+    afterEach(function () {
+      sandbox.restore();
+    });
   })
 });
