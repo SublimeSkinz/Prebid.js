@@ -222,7 +222,7 @@ function interpretResponse(serverResponse, bidRequest) {
 
 /**
  * Send pixel when bidWon event is triggered
- * @param {Object} timeoutData
+ * @param {Object} bid
  */
 function onBidWon(bid) {
   log('Bid won', bid);
@@ -231,12 +231,16 @@ function onBidWon(bid) {
 
 /**
  * Send debug when we timeout
- * @param {Object} timeoutData
+ * @param {Array[{}]} timeoutData
  */
 function onTimeout(timeoutData) {
   log('Timeout from adapter', timeoutData);
+
+  const timeout = utils.deepAccess(timeoutData, '0.timeout');
+  if (timeout) {
+    setState({ timeout });
+  }
   // Set timeout to the one we got from the bid
-  setState({timeout: timeoutData.timeout});
   sendEvent('bidtimeout');
 }
 

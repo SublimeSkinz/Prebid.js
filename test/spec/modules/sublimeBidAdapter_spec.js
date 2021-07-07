@@ -341,9 +341,10 @@ describe('Sublime Adapter', function() {
 
   describe('onTimeout', function() {
     let sandbox;
-    const timeoutData = {
+    // Array of bids that timed out
+    const timeoutData = [{
       timeout: 1234
-    };
+    }];
 
     beforeEach(function() {
       sandbox = sinon.sandbox.create();
