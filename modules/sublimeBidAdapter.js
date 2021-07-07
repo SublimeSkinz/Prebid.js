@@ -238,9 +238,9 @@ function onTimeout(timeoutData) {
 
   const timeout = utils.deepAccess(timeoutData, '0.timeout');
   if (timeout) {
+    // Set timeout to the one we got from the bid
     setState({ timeout });
   }
-  // Set timeout to the one we got from the bid
   sendEvent('bidtimeout');
 }
 
