@@ -353,13 +353,13 @@ describe('Sublime Adapter', function () {
     it('should trigger "bidtimeout" pixel', function () {
       sandbox.spy(utils, 'triggerPixel');
       spec.onTimeout(timeoutData);
-      const params = utils.parseUrl(utils.triggerPixel.args[0][0]).search;
+      const params = utils.parseUrl(utils.triggerPixel.firstCall.firstArg).search;
       expect(params.e).to.equal('bidtimeout');
     });
 
     it('should set timeout value in state', function () {
       spec.onTimeout(timeoutData);
-      expect(spec.state).to.equal({ timeout: 1234, debug: false, notifyId: undefined, transactionId: undefined, zoneId: 123 });
+      expect(spec.state).to.deep.equal({ timeout: 1234, debug: false, notifyId: undefined, transactionId: undefined, zoneId: 123 });
     });
 
     afterEach(function () {
