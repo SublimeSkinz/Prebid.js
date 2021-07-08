@@ -110,6 +110,8 @@ function buildRequests(validBidRequests, bidderRequest) {
     timeout: (typeof bidderRequest === 'object' && !!bidderRequest) ? bidderRequest.timeout : config.getConfig('bidderTimeout'),
   };
 
+  setState({ timeout: commonPayload.timeout });
+
   // RefererInfo
   if (bidderRequest && bidderRequest.refererInfo) {
     commonPayload.referer = bidderRequest.refererInfo.referer;
